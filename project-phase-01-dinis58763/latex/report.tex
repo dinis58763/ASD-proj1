@@ -1,0 +1,138 @@
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+%\renewcommand{\section}{\section{\bold{#1}}
+
+\newcommand{\blankpage}{
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+}
+
+\usepackage[colorlinks=false]{hyperref}
+\hypersetup{%
+  colorlinks = true,
+  linkcolor  = black
+}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+
+% maths
+\usepackage{bm}
+\usepackage{xspace}
+
+% algorithms
+\usepackage{algorithm,algpseudocode}
+\newcommand{\init}{\textbf{Init}\xspace}
+\newcommand{\dokw}{\textbf{do}\xspace}
+\newcommand{\upon}{\textbf{Upon}\xspace}
+\newcommand{\interface}{\textbf{Interface}\xspace}
+\newcommand{\crash}{\textbf{Crash}\xspace}
+\newcommand{\eventname}{\textbf{EventName}\xspace}
+\newcommand{\procname}{\textbf{ProcName}\xspace}
+\newcommand{\timename}{\textbf{TimeName}\xspace}
+\newcommand{\state}{\textbf{State}\xspace}
+\newcommand{\trigger}{\textbf{Trigger}\xspace}
+\newcommand{\requests}{\textbf{Requests}\xspace}
+\newcommand{\indications}{\textbf{Indications}\xspace}
+\newcommand{\proc}{\textbf{Procedure}\xspace}
+\newcommand{\timer}{\textbf{Timer}\xspace}
+\newcommand{\call}{\textbf{Call}\xspace}
+\newcommand{\return}{\textbf{Return}\xspace}
+\newcommand{\setup}{\textbf{Setup}\xspace}
+\newcommand{\periodic}{\textbf{Periodic}\xspace}
+\newcommand{\cancel}{\textbf{Cancel}\xspace}
+\newcommand{\receive}[3]{\textbf{Receiver} (\textbf{#1}, \emph{sender}, #2, #3)}
+\newcommand{\send}[3]{\textbf{Send} (\textbf{#1}, \emph{dest}, #2, #3)}
+\algblockdefx{Interface}{EndInterface}[1]{\interface #1}{\textbf{end} \interface}
+\algblockdefx{AlgState}{EndAlgState}[1]{\state #1}{\textbf{end} \state}
+\algblockdefx{Requests}{EndRequests}{\requests\textbf{:}}{}
+\algblockdefx{Indications}{EndIndications}{\indications\textbf{:}}{}
+\algblockdefx{Upon}{EndUpon}[1]{\upon #1 \algorithmicdo}{\textbf{end} \upon}
+\algblockdefx{Trigger}{EndTrigger}[1]{\trigger #1}{\textbf{end} \trigger}
+\algrenewcommand\textproc{}
+\algrenewcommand\algorithmicprocedure{\textbf{Procedure}}
+\makeatletter
+\newlength{\trianglerightwidth}
+\settowidth{\trianglerightwidth}{$\triangleright$~}
+\algnewcommand{\LineComment}[1]{\State \texttt{//} \textit{#1}}
+\algnewcommand{\LineCommentCont}[1]{\State%
+  \parbox[t]{\dimexpr\linewidth-\ALG@thistlm}{\hangindent=\trianglerightwidth \hangafter=1 \strut$\triangleright$ \emph{#1}\strut}}
+\makeatother
+\newcommand{\farg}[1]{\ensuremath{\textbf{arg}_{#1}}\xspace}
+
+% % Fonts
+\usepackage{times}
+\usepackage[T1]{fontenc}
+
+\def\course{Algoritmos e Sistemas Distribu{\'i}dos}
+\def\coursePT{Algoritmos e Sistemas Distribu{\'i}dos}
+
+\def\titulo{\course{}}
+\title{\titulo}
+
+\def\data{\today}
+\date{\data}
+
+
+
+% Set your name here
+\def\name{Author One and Author Two and Author Three}
+\def\institution{
+NOVA Laboratory for Computer Science and Informatics (NOVA LINCS)\\
+and\\
+Departamento de Inform{\'a}tica\\
+Faculdade de Ci{\^e}ncias e Tecnologia\\
+Universidade NOVA de Lisboa}
+
+\author{\name\\ \institution\\ {\small (Based on notes produced by João Leitão)}}
+
+% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {Pseudocode, Link Abstractions}
+  pdftitle = {\course: Lab 1 Problem},
+  pdfsubject = {\course},
+  pdfpagemode = UseNone
+}
+
+\geometry{
+  body={6.5in, 9.0in},
+  left=1.0in,
+  top=1.0in
+}
+
+% Customize page headers
+\pagestyle{myheadings}
+\markright{\course - Project Phase 1 Report}
+\thispagestyle{empty}
+
+% Custom section fonts
+\usepackage{sectsty}
+
+\usepackage{amsmath}
+
+\sectionfont{\rmfamily\mdseries\Large\textbf}
+\subsectionfont{\rmfamily\mdseries\itshape\large}
+
+\begin{document}
+
+\pagenumbering{arabic} 
+
+\maketitle
+
+\begin{abstract}
+Here is the report abstract
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+Here is the main body of the report. Here is an example citation~\cite{gossip}.
+
+\bibliography{biblio}
+\bibliographystyle{abbrv}
+
+\end{document}
