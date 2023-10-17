@@ -135,13 +135,13 @@ public class ReliableBroadcast extends GenericProtocol {
         byte[] content;
         gossipTarget = requester;
         Map<Host, Set<UUID>> mapgetDelMsg = pullGossipMessage.getDeliveredMsgsMap();
-        Map<UUID, byte[]> mapgetContMsg = pullGossipMessage.getContentMsgMap();
-        Set<UUID> requesterDelivered = mapgetDelMsg.get(requester);
+        Map<UUID, byte[]> mapgetContMsg = pullGossipMessage.getContentMsgMap(); //TODO:MOTA in the request goes all the messages?
+        Set<UUID> requesterDelivered = mapgetDelMsg.get(requester); //TODO:MOTA neste caso não bastava requestER enviar a sua delivered?
         logger.info("requester: {}  delivered messages {}", requester, requesterDelivered);
         
         // Compare the requester's delivered messages with your own delivered messages
         Set<UUID> missingMessages = new HashSet<>(requesterDelivered);
-        missingMessages.removeAll(delivered);
+        missingMessages.removeAll(delivered); //TODO:MOTA is this correct? missing msgs of requestED //should be requestER to send back
         logger.info("missingMessages {}", missingMessages);
         
         // Send the missing messages to the requester
