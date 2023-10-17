@@ -55,7 +55,6 @@ public class ReliableBroadcast extends GenericProtocol {
     // Map to keep track of the messages' content according by mid
     private final Map<UUID, byte[]> msgContentMap;
 
-
     public ReliableBroadcast(Properties properties, Host myself) throws IOException, HandlerRegistrationException {
         super(PROTOCOL_NAME, PROTOCOL_ID);
         this.myself = myself;
@@ -109,9 +108,10 @@ public class ReliableBroadcast extends GenericProtocol {
     private void uponBroadcastRequest(BroadcastRequest request, short sourceProto) {
         if (!channelReady) return;
 
-        msgContentMap.put(request.getMsgId(), request.getMsg());
         delivered.add(request.getMsgId());
         deliveredMsgsMap.put(request.getSender(), delivered);
+        msgContentMap.put(request.getMsgId(), request.getMsg());
+
         logger.info("request.getSender() {}", request.getSender());
         logger.info("msgContentMap {}", msgContentMap);
         logger.info("deliveredMsgsMap {}", deliveredMsgsMap);
@@ -120,9 +120,23 @@ public class ReliableBroadcast extends GenericProtocol {
         scheduler.scheduleAtFixedRate(this::sendPullGossip, 0, 10, TimeUnit.SECONDS); // Adjust the interval as needed
     }
 
-    private void uponPBroadcastPull(PullGossipMessage msg, Host from, short sourceProto, int channelId) {
+    private void sendPullGossip() {
         if (!channelReady) return;
 
+        if (!pi.isEmpty()) {
+            Host randomNeighbour = randomSelection(t, pi);
+            if(randomNeighbour != null) {
+                PullGossipMessage msg = new PullGossipMessage(myself, deliveredMsgsMap, msgContentMap);
+                sendMessage(msg, randomNeighbour);
+                logger.info("Pull Gossip sent {} to {}", msg, randomNeighbour);
+            }
+            else 
+                logger.error("No active neighbor found to send Pull Gossip");
+        }
+    }
+
+    private void uponPBroadcastPull(PullGossipMessage msg, Host from, short sourceProto, int channelId) {
+        if (!channelReady) return;
         if (!myself.equals(from)) {
                 logger.info("Received {} from {}", msg, from);
                 respondToPullGossip(msg, from);
@@ -135,51 +149,38 @@ public class ReliableBroadcast extends GenericProtocol {
         byte[] content;
         gossipTarget = requester;
         Map<Host, Set<UUID>> mapgetDelMsg = pullGossipMessage.getDeliveredMsgsMap();
-        Map<UUID, byte[]> mapgetContMsg = pullGossipMessage.getContentMsgMap();
+        // Map<UUID, byte[]> mapgetContMsg = pullGossipMessage.getContentMsgMap();
         Set<UUID> requesterDelivered = mapgetDelMsg.get(requester);
         logger.info("requester: {}  delivered messages {}", requester, requesterDelivered);
-        
+        logger.info("receiver: {}  delivered messages {}", myself, delivered);
+
         // Compare the requester's delivered messages with your own delivered messages
-        Set<UUID> missingMessages = new HashSet<>(requesterDelivered);
-        missingMessages.removeAll(delivered);
+        Set<UUID> missingMessages = new HashSet<>(delivered);
+        missingMessages.removeAll(requesterDelivered);
         logger.info("missingMessages {}", missingMessages);
-        
+
         // Send the missing messages to the requester
         for (UUID missingMessageId : missingMessages) {
-            content = mapgetContMsg.get(missingMessageId);
+            content = msgContentMap.get(missingMessageId);
             logger.info("missingMessageId {}  content {}", missingMessageId, content);
-            GossipMessage responseMessage = new GossipMessage(missingMessageId, myself, getProtoId(), content);
-            uponPBroadcast(responseMessage, myself, getProtoId(), -1);
+            if (content != null && gossipTarget != null) { // Check if the content and target are not null before creating the GossipMessage
+                GossipMessage responseMessage = new GossipMessage(missingMessageId, myself, getProtoId(), content);
+                logger.info("Sent {} to {}", responseMessage, gossipTarget); 
+                sendMessage(responseMessage, gossipTarget); 
+            }
         }
     }
     
     /*--------------------------------- Messages ---------------------------------------- */
     
-    private void sendPullGossip() {
-        if (!channelReady) return;
-
-        if (!pi.isEmpty()) {
-            Host randomNeighbour = randomSelection(t, pi);
-            PullGossipMessage msg = new PullGossipMessage(myself, deliveredMsgsMap, msgContentMap);
-            sendMessage(msg, randomNeighbour);
-            logger.info("Pull Gossip sent {} to {}", msg, randomNeighbour);
-        }
-    }
-    
     private void uponPBroadcast(GossipMessage msg, Host from, short sourceProto, int channelId) {
+        logger.info("Received {} from {}", msg, from); 
         
-        // logger.info("Received {} from {}", msg, from);
-        if (delivered.add(msg.getMid())) {
-
-            triggerNotification(new DeliverNotification(msg.getMid(), msg.getSender(), msg.getContent()));
-            logger.info("gossipTarget {}", gossipTarget);
-            
-            //Send the message to whom sent the pull gossip message
-            if (!gossipTarget.equals(from)) {
-                    logger.info("Sent {} to {}", msg, gossipTarget);
-                    sendMessage(msg, gossipTarget);
-            }
-        }
+        triggerNotification(new DeliverNotification(msg.getMid(), msg.getSender(), msg.getContent()));
+        
+        delivered.add(msg.getMid());
+        deliveredMsgsMap.put(myself, delivered);
+        msgContentMap.put(msg.getMid(), msg.getContent());
     }
 
     private void uponMsgFail(ProtoMessage msg, Host host, short destProto,
@@ -187,7 +188,7 @@ public class ReliableBroadcast extends GenericProtocol {
         //If a message fails to be sent, for whatever reason, log the message and the reason
         logger.error("Message {} to {} failed, reason: {}", msg, host, throwable);
     }
-    
+
     /*--------------------------------- Auxiliary ---------------------------------------- */
     
     // Method to randomly select gossip target from the set of processes
@@ -214,6 +215,11 @@ public class ReliableBroadcast extends GenericProtocol {
         for(Host h: notification.getNeighbours()) {
             pi.remove(h);
             logger.info("Neighbour down: " + h);
+            // Remove the entries related to the neighbor from delivered messages map
+            deliveredMsgsMap.remove(h);
+            if (gossipTarget != null && gossipTarget.equals(h)) {
+                gossipTarget = null; // Reset the gossip target if it matches the removed neighbor
+            }
 	    }
     }
 }
