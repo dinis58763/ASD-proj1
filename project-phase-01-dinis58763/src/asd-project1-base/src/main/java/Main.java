@@ -1,8 +1,10 @@
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import protocols.apps.BroadcastApp;
+import protocols.broadcast.epidemic.EpidemicBroadcast;
 import protocols.broadcast.flood.FloodBroadcast;
 import protocols.broadcast.reliable.ReliableBroadcast;
+import protocols.membership.full.HyParView;
 import protocols.membership.full.SimpleFullMembership;
 import pt.unl.fct.di.novasys.babel.core.Babel;
 import pt.unl.fct.di.novasys.network.data.Host;
@@ -44,12 +46,13 @@ public class Main {
 
         logger.info("Hello, I am {}", myself);
 
+
         // Application
         // BroadcastApp broadcastApp = new BroadcastApp(myself, props, FloodBroadcast.PROTOCOL_ID);
-        BroadcastApp broadcastApp = new BroadcastApp(myself, props, ReliableBroadcast.PROTOCOL_ID);
+        BroadcastApp broadcastApp = new BroadcastApp(myself, props, EpidemicBroadcast.PROTOCOL_ID);
         // Broadcast Protocol
         // FloodBroadcast broadcast = new FloodBroadcast(props, myself);
-        ReliableBroadcast broadcast = new ReliableBroadcast(props, myself);
+        EpidemicBroadcast broadcast = new EpidemicBroadcast(props, myself);
         // Membership Protocol
         SimpleFullMembership membership = new SimpleFullMembership(props, myself);
 
@@ -63,6 +66,7 @@ public class Main {
         broadcastApp.init(props);
         broadcast.init(props);
         membership.init(props);
+
 
         //Start babel and protocol threads
         babel.start();
