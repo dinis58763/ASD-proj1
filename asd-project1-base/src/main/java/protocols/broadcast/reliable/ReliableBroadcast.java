@@ -66,6 +66,8 @@ public class ReliableBroadcast extends GenericProtocol {
         deliveredMsgsMap = new HashMap<>();
         msgContentMap = new HashMap<>();
         scheduler = Executors.newScheduledThreadPool(1);
+        // Schedule periodic Pull Gossip messages 
+        scheduler.scheduleAtFixedRate(this::sendPullGossip, 0, 10, TimeUnit.SECONDS); // Adjust the interval as needed
 
         /*--------------------- Register Request Handlers -----------------------------*/
         registerRequestHandler(BroadcastRequest.REQUEST_ID, this::uponBroadcastRequest);
@@ -115,9 +117,6 @@ public class ReliableBroadcast extends GenericProtocol {
         logger.info("request.getSender() {}", request.getSender());
         logger.info("msgContentMap {}", msgContentMap);
         logger.info("deliveredMsgsMap {}", deliveredMsgsMap);
-        
-        // Schedule periodic Pull Gossip messages
-        scheduler.scheduleAtFixedRate(this::sendPullGossip, 0, 10, TimeUnit.SECONDS); // Adjust the interval as needed
     }
 
     private void sendPullGossip() {
