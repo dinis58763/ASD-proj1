@@ -44,7 +44,6 @@ public class HyParView extends GenericProtocol {
 
     private final int activeRandomWalkLength;
     private final int passiveRandomWalkLength;
-    private final int shuffleRandomWalkLength;
 
 
     private final int sampleTime; //param: timeout for samples
@@ -74,8 +73,6 @@ public class HyParView extends GenericProtocol {
 
         this.activeRandomWalkLength = 20;
         this.passiveRandomWalkLength = 10;
-        this.shuffleRandomWalkLength = 2;
-
 
         //Get some configurations from the Properties object
         this.subsetSize = Integer.parseInt(props.getProperty("sample_size", "6"));
@@ -111,7 +108,6 @@ public class HyParView extends GenericProtocol {
 
 
         /*--------------------- Register Timer Handlers ----------------------------- */
-        //registerTimerHandler(ShuffleTimer.TIMER_ID, this::uponShuffleTimer);
         registerTimerHandler(InfoTimer.TIMER_ID, this::uponInfoTime);
 
 
@@ -241,30 +237,12 @@ public class HyParView extends GenericProtocol {
             addNodePassiveView(peer);
 
         logger.info("Upon Disconnect sent by: " + from);
-        logger.info("ActiveView: " + activeView);
+        /*logger.info("ActiveView: " + activeView);
         logger.info("PassiveView: " + passiveView);
         logger.info("OutgoingConnection: " + outgoingConnection);
-        logger.info("IngoingConnection: " + ingoingConnection);
+        logger.info("IngoingConnection: " + ingoingConnection);*/
     }
 
-    private void uponShuffleMessage(ShuffleMessage msg, Host from, short sourceProto, int channelId) {
-        if (msg.getTimeToLive() > 0 && activeView.size() > 1) {
-            Host h;
-            do {
-                h = getRandom(activeView);
-            } while (Objects.equals(h, from));
-
-            ShuffleMessage newMsg = new ShuffleMessage(
-                    msg.getNode(),
-                    msg.getActiveView(),
-                    msg.getPassiveView(),
-                    msg.getTimeToLive() - 1);
-
-            sendMessage(newMsg, h);
-        } else {
-
-        }
-    }
 
     private void dropRandomElementFromActiveView() {
         Host h = getRandom(activeView);
@@ -295,13 +273,6 @@ public class HyParView extends GenericProtocol {
                              Throwable throwable, int channelId) {
         //If a message fails to be sent, for whatever reason, log the message and the reason
         logger.error("Message {} to {} failed, reason: {}", msg, host, throwable);
-    }
-
-    /*--------------------------------- Timers ---------------------------------------- */
-    private void uponShuffleTimer(InfoTimer timer, long timerId) {
-        ShuffleMessage msg = new ShuffleMessage(self, activeView, passiveView, shuffleRandomWalkLength);
-        Host h = getRandom(activeView);
-        sendMessage(msg, h);
     }
 
     //Gets a random element from the set of peers

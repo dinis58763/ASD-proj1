@@ -83,7 +83,6 @@ public class ReliableBroadcast extends GenericProtocol {
     @Override
     public void init(Properties props) {
         //Nothing to do here, we just wait for event from the membership or the application
-        //Nothing to do here, we just wait for event from the membership or the application
         int pMetricsInterval = Integer.parseInt(props.getProperty("protocol_metrics_interval", "10000"));
         if (pMetricsInterval > 0)
             setupPeriodicTimer(new InfoTimer(), pMetricsInterval, pMetricsInterval);

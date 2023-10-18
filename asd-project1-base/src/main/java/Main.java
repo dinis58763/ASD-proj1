@@ -3,6 +3,7 @@ import org.apache.logging.log4j.Logger;
 import protocols.apps.BroadcastApp;
 import protocols.broadcast.flood.FloodBroadcast;
 import protocols.broadcast.reliable.ReliableBroadcast;
+import protocols.membership.full.HyParView;
 import protocols.membership.full.SimpleFullMembership;
 import pt.unl.fct.di.novasys.babel.core.Babel;
 import pt.unl.fct.di.novasys.network.data.Host;
@@ -51,7 +52,7 @@ public class Main {
         // FloodBroadcast broadcast = new FloodBroadcast(props, myself);
         ReliableBroadcast broadcast = new ReliableBroadcast(props, myself);
         // Membership Protocol
-        SimpleFullMembership membership = new SimpleFullMembership(props, myself);
+        HyParView membership = new HyParView(props, myself);
 
         //Register applications in babel
         babel.registerProtocol(broadcastApp);
